@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import Image from "next/image";
 import gsap from "gsap";
-import AtvHero from "@/components/AtvHero";
 import RouteModal, { type RouteData } from "@/components/RouteModal";
 
 /* ================= CONFIG ================= */
@@ -32,11 +31,11 @@ type Tour = {
 // 👉 Cambia cada "image" por una foto distinta de cada tour
 const TOURS: Tour[] = [
   {
-    name: "TOUR PACUCHA",
+    name: "TOUR SONDOR",
     description:
-      "Recorre los paisajes alrededor de la laguna de Pacucha y disfruta de una experiencia diferente sobre cuatro ruedas.",
+      "Recorre los paisajes por el contorno de la laguna de Pacucha con destino el centro arqueologico de Sondor y disfruta de una experiencia diferente sobre cuatro ruedas.",
     price: 80,
-    image: "/images/pacucha-hero.jpg",
+    image: "/images/tours/toursondor.png",
     badge: "MÁS POPULAR",
     route: {
       image: "/images/rutas/pacucha-sondor.png",
@@ -88,6 +87,32 @@ export default function Home() {
   const [activeTour, setActiveTour] = useState<Tour | null>(null);
   const rootRef = useRef<HTMLElement>(null);
 
+  // Al cargar o refrescar: siempre empieza arriba (sin saltar a #tours)
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+    if (window.location.hash) {
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search
+      );
+    }
+    window.scrollTo(0, 0);
+  }, []);
+
+  // Scroll suave a una sección SIN dejar el # en la URL
+  const goTo = (e: MouseEvent<HTMLAnchorElement>, href: string) => {
+    e.preventDefault();
+    setMenuOpen(false);
+    if (href === "#inicio") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       const timeline = gsap.timeline();
@@ -116,14 +141,19 @@ export default function Home() {
         <div className="mx-auto max-w-7xl rounded-2xl border border-white/10 bg-black/45 shadow-2xl backdrop-blur-md">
           <div className="flex items-center justify-between px-4 py-3 sm:px-6">
             {/* LOGO + NOMBRE */}
-            <a href="#inicio" className="flex items-center gap-3">
+            <a
+              href="#inicio"
+              onClick={(e) => goTo(e, "#inicio")}
+              className="flex items-center gap-3"
+            >
               <Image
                 src="/images/logo.png"
                 alt="Rutas de Pacucha 4Full"
-                width={120}
-                height={64}
+                width={320}
+                height={170}
                 priority
-                className="h-16 w-auto object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)]"
+                style={{ width: "auto" }}
+                className="h-20 object-contain drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] sm:h-24 md:h-28"
               />
 
               <div className="hidden leading-none sm:flex sm:flex-col">
@@ -145,6 +175,7 @@ export default function Home() {
                 <a
                   key={link.href}
                   href={link.href}
+                  onClick={(e) => goTo(e, link.href)}
                   className="text-sm font-bold tracking-wide text-white transition hover:text-orange-500"
                 >
                   {link.label}
@@ -158,7 +189,7 @@ export default function Home() {
                 href={whatsappLink("Hola, quiero reservar un tour en cuatrimoto en Pacucha.")}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full bg-orange-500 px-5 py-3 text-sm font-black tracking-wide text-black shadow-lg transition duration-300 hover:scale-105 hover:bg-orange-400"
+                className="rounded-full bg-orange-500 px-4 py-2.5 text-xs font-black tracking-wide text-black shadow-lg transition duration-300 hover:scale-105 hover:bg-orange-400 sm:px-5 sm:py-3 sm:text-sm"
               >
                 RESERVAR
               </a>
@@ -197,7 +228,7 @@ export default function Home() {
                 <a
                   key={link.href}
                   href={link.href}
-                  onClick={() => setMenuOpen(false)}
+                  onClick={(e) => goTo(e, link.href)}
                   className="rounded-lg px-3 py-3 text-sm font-bold tracking-wide transition hover:bg-white/10 hover:text-orange-500"
                 >
                   {link.label}
@@ -211,7 +242,7 @@ export default function Home() {
       {/* ================= HERO ================= */}
       <section
         id="inicio"
-        className="relative flex min-h-screen items-center overflow-hidden"
+        className="relative flex min-h-[100svh] items-center overflow-hidden"
       >
         {/* Fondo */}
         <div id="hero-background" className="absolute inset-0">
@@ -226,20 +257,20 @@ export default function Home() {
         </div>
 
         {/* Oscurecimiento */}
-        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-0 bg-black/55 md:bg-black/45" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
 
         {/* Contenido */}
         <div
           id="hero-content"
-          className="relative z-10 mx-auto w-full max-w-7xl px-8 pt-32"
+          className="relative z-10 mx-auto w-full max-w-7xl px-5 pb-16 pt-36 md:px-8 md:pb-0 md:pt-44"
         >
           <div className="max-w-3xl">
-            <p className="mb-5 text-sm font-bold tracking-[0.35em] text-orange-400">
+            <p className="mb-5 text-xs font-bold tracking-[0.25em] text-orange-400 sm:text-sm sm:tracking-[0.35em]">
               PACUCHA · ANDAHUAYLAS · APURÍMAC
             </p>
 
-            <h1 className="text-6xl font-black leading-none tracking-tight text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] md:text-8xl">
+            <h1 className="text-5xl font-black leading-none sm:text-6xl tracking-tight text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)] md:text-8xl">
               VIVE LA
               <br />
               <span className="text-orange-500 drop-shadow-[0_4px_12px_rgba(0,0,0,0.9)]">
@@ -247,7 +278,7 @@ export default function Home() {
               </span>
             </h1>
 
-            <p className="mt-8 max-w-xl text-lg leading-relaxed text-gray-200">
+            <p className="mt-6 max-w-xl text-base leading-relaxed text-gray-200 sm:text-lg md:mt-8">
               Descubre los paisajes de Pacucha sobre cuatro ruedas. Una
               experiencia de aventura entre montañas, caminos y naturaleza en
               el corazón de Apurímac.
@@ -265,6 +296,7 @@ export default function Home() {
 
               <a
                 href="#tours"
+                onClick={(e) => goTo(e, "#tours")}
                 className="rounded-full border border-white/40 px-8 py-4 font-bold backdrop-blur-sm transition hover:bg-white hover:text-black"
               >
                 VER TOURS
@@ -273,19 +305,17 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Cuatrimoto */}
-        <AtvHero />
       </section>
 
       {/* ================= TOURS ================= */}
-      <section id="tours" className="scroll-mt-4 bg-zinc-950 px-8 py-24">
+      <section id="tours" className="scroll-mt-4 bg-zinc-950 px-5 py-16 md:px-8 md:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 max-w-2xl">
             <p className="mb-3 text-sm font-bold tracking-[0.3em] text-orange-500">
               DESCUBRE PACUCHA
             </p>
 
-            <h2 className="text-4xl font-black md:text-6xl">
+            <h2 className="text-3xl font-black sm:text-4xl md:text-6xl">
               ELIGE TU
               <span className="text-orange-500"> AVENTURA</span>
             </h2>
@@ -367,14 +397,14 @@ export default function Home() {
       </section>
 
       {/* ================= GALERÍA ================= */}
-      <section id="galeria" className="scroll-mt-4 bg-black px-8 py-24">
+      <section id="galeria" className="scroll-mt-4 bg-black px-5 py-16 md:px-8 md:py-24">
         <div className="mx-auto max-w-7xl">
           <div className="mb-14 max-w-2xl">
             <p className="mb-3 text-sm font-bold tracking-[0.3em] text-orange-500">
               MOMENTOS REALES
             </p>
 
-            <h2 className="text-4xl font-black md:text-6xl">
+            <h2 className="text-3xl font-black sm:text-4xl md:text-6xl">
               GALERÍA
               <span className="text-orange-500"> 4FULL</span>
             </h2>
@@ -400,7 +430,7 @@ export default function Home() {
       </section>
 
       {/* ================= CTA ================= */}
-      <section className="relative overflow-hidden px-8 py-24">
+      <section className="relative overflow-hidden px-5 py-16 md:px-8 md:py-24">
         <div className="absolute inset-0 bg-orange-500" />
 
         <div className="relative z-10 mx-auto max-w-5xl text-center">
@@ -408,7 +438,7 @@ export default function Home() {
             ¿ESTÁS LISTO?
           </p>
 
-          <h2 className="mt-4 text-5xl font-black text-black md:text-7xl">
+          <h2 className="mt-4 text-4xl font-black text-black sm:text-5xl md:text-7xl">
             TU AVENTURA
             <br />
             COMIENZA AQUÍ
@@ -426,14 +456,14 @@ export default function Home() {
       </section>
 
       {/* ================= CONTACTO ================= */}
-      <section id="contacto" className="scroll-mt-4 bg-zinc-950 px-8 py-24">
+      <section id="contacto" className="scroll-mt-4 bg-zinc-950 px-5 py-16 md:px-8 md:py-24">
         <div className="mx-auto grid max-w-7xl gap-12 md:grid-cols-2">
           <div>
             <p className="mb-3 text-sm font-bold tracking-[0.3em] text-orange-500">
               HABLEMOS
             </p>
 
-            <h2 className="text-4xl font-black md:text-6xl">
+            <h2 className="text-3xl font-black sm:text-4xl md:text-6xl">
               CONTACTO
             </h2>
 
